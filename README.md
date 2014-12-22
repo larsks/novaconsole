@@ -6,8 +6,9 @@ OpenStack.  You can read more about that support here:
 
 ## Usage
 
-With valid OpenStack credentials available in your environment, you
-can run `novaconsole` with the name or UUID of a Nova server:
+With valid OpenStack credentials (`OS_USERNAME`, `OS_PASSWORD`,
+`OS_AUTH_URL`, etc) available in your environment, you can run
+`novaconsole` with the name or UUID of a Nova server:
 
     $ novaconsole my-server
     WARNING:novaconsole.client:connected to: ws://127.0.0.1:6083/?token=bdcea854-2566-4f3b-86ef-4791aba42eea
