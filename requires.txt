@@ -1,0 +1,4 @@
+trollius
+websocket-client
+python-keystoneclient
+python-novaclient

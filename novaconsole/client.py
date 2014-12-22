@@ -1,21 +1,27 @@
-#!/usr/bin/env python
-
-import os
 import sys
-import argparse
-import websocket
-import tty
 import termios
+import tty
 import logging
 import socket
-import trollius as asyncio
 
+from novaconsole.exc import *
 
-class UserExit(Exception):
-    '''Raised inside the event loop when someone enters the disconnect
-    escape sequence.'''
-    pass
+try:
+    import trollius as asyncio
+except ImportError:
+    logging.fatal('This package requires "trollius", the asyncio port '
+                  'for Python 2.x.')
+    logging.fatal('See https://pypi.python.org/pypi/trollius for '
+                  'additional information.')
+    sys.exit()
 
+try:
+    import websocket
+except ImportError:
+    logging.fatal('This package requires the "websocket" module.')
+    logging.fatal('See http://pypi.python.org/pypi/websocket-client for '
+                  'more information.')
+    sys.exit()
 
 def graceful_exit(f):
     def _(self, *args, **kwargs):
@@ -33,18 +39,26 @@ class Client (object):
         self.url = url
         self.escape = escape
 
+        self.setup_logging()
         self.setup_loop()
         self.connect()
+
+    def setup_logging(self):
+        self.log = logging.getLogger('console-client')
 
     def setup_loop(self):
         self.loop = asyncio.get_event_loop()
 
     def connect(self):
-        self.ws = websocket.create_connection(
-            args.url,
-            header={
-                'Sec-WebSocket-Protocol: binary',
-            })
+        self.log.info('connecting to url: %s', self.url)
+        try:
+            self.ws = websocket.create_connection(
+                self.url,
+                header={
+                    'Sec-WebSocket-Protocol: binary',
+                })
+        except socket.error as e:
+            raise ConnectionFailed(e)
 
     def start_loop(self):
         self.exc = None
@@ -57,11 +71,20 @@ class Client (object):
         try:
             self.setup_tty()
             self.loop.run_forever()
+
+            if self.exc:
+                raise self.exc
+        except socket.error as e:
+            raise ConnectionFailed(e)
+        except websocket.WebSocketConnectionClosedException as e:
+            raise Disconnected(e)
+        except TypeError:
+            pass
+        except:
+            raise
         finally:
             self.restore_tty()
         
-        if self.exc:
-            raise self.exc
 
     def setup_tty(self):
         self.old_settings = termios.tcgetattr(sys.stdin)
@@ -98,47 +121,5 @@ class Client (object):
         sys.stdout.write(data)
         sys.stdout.flush()
 
-
-def parse_args():
-    p = argparse.ArgumentParser()
-    p.add_argument('--escape', '-e',
-                   default='~')
-    p.add_argument('--debug', '-d',
-                   action='store_const',
-                   const=logging.DEBUG,
-                   dest='loglevel')
-    p.add_argument('--verbose', '-v',
-                   action='store_const',
-                   const=logging.INFO,
-                   dest='loglevel')
-    p.add_argument('url')
-
-    p.set_defaults(loglevel=logging.WARN)
-
-    return p.parse_args()
-
-
-def main():
-    global args
-    args = parse_args()
-
-    logging.basicConfig(
-        level=args.loglevel)
-
-    client = Client(args.url, escape=args.escape)
-
-    try:
-        logging.warn('*** connected (type "%s." to disconnect)',
-                     args.escape)
-        client.start_loop()
-    except socket.error:
-        logging.warn('*** failed to connect to websocket')
-    except websocket.WebSocketConnectionClosedException:
-        logging.warn('*** remote closed connection')
-    except UserExit:
-        logging.warn('*** disconnected')
-
-if __name__ == '__main__':
-    main()
 
 
