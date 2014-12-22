@@ -15,9 +15,14 @@ from novaconsole.exc import *
 def parse_args():
     p = argparse.ArgumentParser()
     p.add_argument('--url',
-                   action='store_true')
+                   action='store_true',
+                   help='Target specifies a websocket url '
+                   'rather than nova server name.  Using this '
+                   'option does not require authentication.')
     p.add_argument('--escape', '-e',
-                   default='~')
+                   default='~',
+                   help='Character used to start escape sequences when '
+                   'connected. Defaults to "~".')
 
     g = p.add_argument_group('Logging options')
     g.add_argument('--debug', '-d',
@@ -31,7 +36,9 @@ def parse_args():
 
     openstack.add_openstack_args(p)
 
-    p.add_argument('target')
+    p.add_argument('target',
+                   help='A server name, uuid, or (with --url) '
+                   'a websocket url')
 
     p.set_defaults(loglevel=logging.WARN)
 
