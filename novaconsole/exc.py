@@ -3,8 +3,10 @@ class UserExit(Exception):
     escape sequence.'''
     pass
 
+
 class Disconnected(Exception):
     pass
+
 
 class ConnectionFailed(Exception):
     pass

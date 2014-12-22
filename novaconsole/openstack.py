@@ -1,4 +1,3 @@
-import argparse
 import logging
 import os
 
@@ -60,5 +59,3 @@ class OpenstackClient(object):
                     return server
 
         raise KeyError(name_or_uuid)
-
-

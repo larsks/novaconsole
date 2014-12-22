@@ -23,6 +23,7 @@ except ImportError:
                   'more information.')
     sys.exit()
 
+
 def graceful_exit(f):
     def _(self, *args, **kwargs):
         try:
@@ -84,7 +85,6 @@ class Client (object):
             raise
         finally:
             self.restore_tty()
-        
 
     def setup_tty(self):
         self.old_settings = termios.tcgetattr(sys.stdin)
@@ -120,6 +120,3 @@ class Client (object):
         data = self.ws.recv()
         sys.stdout.write(data)
         sys.stdout.flush()
-
-
-
