@@ -1,12 +1,16 @@
-class UserExit(Exception):
-    '''Raised inside the event loop when someone enters the disconnect
-    escape sequence.'''
-    pass
+class NovaConsoleException(Exception):
+    'base for all novaconsole generated exceptions'
+    def __str__(self):
+        return self.__doc__
 
 
-class Disconnected(Exception):
-    pass
+class UserExit(NovaConsoleException):
+    'user requested disconnect'
 
 
-class ConnectionFailed(Exception):
-    pass
+class Disconnected(NovaConsoleException):
+    'remote host closed connection'
+
+
+class ConnectionFailed(NovaConsoleException):
+    'failed to connect to remote host'

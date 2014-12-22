@@ -11,6 +11,7 @@ from novaconsole import openstack
 from novaconsole.client import Client
 from novaconsole.exc import *
 
+LOG = logging.getLogger('novaconsole')
 
 def parse_args():
     p = argparse.ArgumentParser()
@@ -23,6 +24,11 @@ def parse_args():
                    default='~',
                    help='Character used to start escape sequences when '
                    'connected. Defaults to "~".')
+    p.add_argument('--close-wait', '-w',
+                   default=0.5,
+                   type=float,
+                   help='How long to wait for remote output when reading '
+                   ' from a pipe.')
 
     g = p.add_argument_group('Logging options')
     g.add_argument('--debug', '-d',
@@ -54,28 +60,32 @@ def main():
     if args.url:
         console_url = args.target
     else:
-        osclient = openstack.OpenstackClient(args)
         try:
+            osclient = openstack.OpenstackClient(args)
             server = osclient.server(args.target)
-        except KeyError:
-            logging.error('unable to find server "%s"', args.target)
+            data = server.get_serial_console('serial')
+        except openstack.kexc.Unauthorized:
+            LOG.error('failed to authenticate to keystone')
+            sys.exit(1)
+        except openstack.nexc.NotFound:
+            LOG.error('unable to find server "%s"',
+                          args.target)
+            sys.exit(1)
+        except openstack.nexc.BadRequest:
+            LOG.error('failed to request serial console for "%s"',
+                          args.target)
             sys.exit(1)
 
-        data = server.get_serial_console('serial')
         console_url = data['console']['url']
 
     try:
-        console = Client(console_url, escape=args.escape)
+        console = Client(console_url,
+                         escape=args.escape,
+                         close_wait=args.close_wait)
 
-        logging.warn('*** connected (type "%s." to disconnect)',
-                     args.escape)
         console.start_loop()
-    except ConnectionFailed:
-        logging.warn('*** failed to connect to websocket')
-    except Disconnected:
-        logging.warn('*** remote closed connection')
-    except UserExit:
-        logging.warn('*** disconnected')
+    except NovaConsoleException as e:
+        LOG.error(e)
 
 if __name__ == '__main__':
     main()
