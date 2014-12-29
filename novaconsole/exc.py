@@ -1,8 +1,12 @@
 class NovaConsoleException(Exception):
     'base for all novaconsole generated exceptions'
-    def __str__(self):
-        return self.__doc__
+    def __init__(self, wrapped=None):
+        self.wrapped = wrapped
 
+    def __str__(self):
+        return '%s: %s' % (
+            self.__doc__,
+            self.wrapped if str(self.wrapped) else 'an unknown error occurred')
 
 class UserExit(NovaConsoleException):
     'user requested disconnect'

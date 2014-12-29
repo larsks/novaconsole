@@ -46,6 +46,8 @@ class Client (object):
                           self.escape)
         except socket.error as e:
             raise ConnectionFailed(e)
+        except websocket.WebSocketConnectionClosedException as e:
+            raise ConnectionFailed(e)
 
     def start_loop(self):
         self.poll = select.poll()
