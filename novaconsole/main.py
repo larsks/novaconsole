@@ -64,16 +64,11 @@ def main():
             osclient = openstack.OpenstackClient(args)
             server = osclient.server(args.target)
             data = server.get_serial_console('serial')
-        except openstack.kexc.Unauthorized:
-            LOG.error('failed to authenticate to keystone')
+        except openstack.kexc.ClientException as exc:
+            LOG.error('failed to authenticate to keystone: %s', exc)
             sys.exit(1)
-        except openstack.nexc.NotFound:
-            LOG.error('unable to find server "%s"',
-                          args.target)
-            sys.exit(1)
-        except openstack.nexc.BadRequest:
-            LOG.error('failed to request serial console for "%s"',
-                          args.target)
+        except openstack.nexc.ClientException as exc:
+            LOG.error('failed to connect to serial console: %s', exc)
             sys.exit(1)
 
         console_url = data['console']['url']
