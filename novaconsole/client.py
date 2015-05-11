@@ -81,7 +81,7 @@ class Client (object):
         when = None
 
         while True:
-            for fd, event in self.poll.poll(0.5):
+            for fd, event in self.poll.poll(500):
                 if fd == self.ws.fileno():
                     self.handle_websocket(event)
                 elif fd == sys.stdin.fileno():
