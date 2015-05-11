@@ -4,7 +4,7 @@ import logging
 import os
 
 import keystoneclient.v2_0.client as ksclient
-import novaclient.v1_1.client as novaclient
+import novaclient.client as nova
 import novaclient.exceptions as nexc
 import keystoneclient.exceptions as kexc
 
@@ -49,7 +49,8 @@ class OpenstackClient(object):
             auth_url=args.os_auth_url)
 
         self.log.debug('getting nova client')
-        self.nova = novaclient.Client(
+        self.nova = nova.Client(
+            '1.1',
             None,
             None,
             None,
