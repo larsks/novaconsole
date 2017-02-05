@@ -29,6 +29,8 @@ def parse_args():
                    type=float,
                    help='How long to wait for remote output when reading '
                    ' from a pipe.')
+    p.add_argument('--no-subprotocols', '-N', action='store_true',
+                   help='Disable explicit subprotocol request.')
 
     g = p.add_argument_group('Logging options')
     g.add_argument('--debug', '-d',
@@ -74,8 +76,10 @@ def main():
         console_url = data['console']['url']
 
     try:
+        subprotocols = [] if args.no_subprotocols else None
         console = Client(console_url,
                          escape=args.escape,
+                         subprotocols=subprotocols,
                          close_wait=args.close_wait)
 
         console.start_loop()

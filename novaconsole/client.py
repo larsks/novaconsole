@@ -24,10 +24,14 @@ except ImportError:
 class Client (object):
     def __init__(self, url,
                  escape='~',
-                 close_wait=0.5):
+                 close_wait=0.5,
+                 subprotocols=None):
         self.url = url
         self.escape = escape
         self.close_wait = close_wait
+
+        self.subprotocols = (subprotocols if subprotocols is not None
+                             else default_subprotocols)
 
         self.setup_logging()
         self.connect()
@@ -40,7 +44,7 @@ class Client (object):
         try:
             self.ws = websocket.create_connection(
                 self.url,
-                subprotocols=['binary', 'base64'])
+                subprotocols=self.subprotocols)
             self.log.warn('connected to: %s', self.url)
             self.log.warn('type "%s." to disconnect',
                           self.escape)
