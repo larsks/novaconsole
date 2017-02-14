@@ -9,8 +9,9 @@ import termios
 import time
 import tty
 
-
 from novaconsole.exc import *
+
+default_subprotocols = ['binary', 'base64']
 
 try:
     import websocket
@@ -115,8 +116,6 @@ class Client (object):
     def handle_stdin(self, event):
         if event in (select.POLLHUP, select.POLLNVAL):
             self.log.debug('event %d on stdin', event)
-
-            self.log.debug('eof on stdin')
             self.poll.unregister(sys.stdin)
             self.quit = True
 

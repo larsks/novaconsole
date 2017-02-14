@@ -28,7 +28,7 @@ def parse_args():
                    default=0.5,
                    type=float,
                    help='How long to wait for remote output when reading '
-                   ' from a pipe.')
+                   'from a pipe.')
     p.add_argument('--no-subprotocols', '-N', action='store_true',
                    help='Disable explicit subprotocol request.')
 
