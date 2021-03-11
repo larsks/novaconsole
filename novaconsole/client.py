@@ -160,5 +160,5 @@ class Client (object):
         if not data:
             return
 
-        sys.stdout.write(data)
+        sys.stdout.write(bytes.decode(data))
         sys.stdout.flush()
