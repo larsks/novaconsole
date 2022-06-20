@@ -136,9 +136,9 @@ class Client (object):
             raise UserExit()
         elif self.read_escape:
             self.read_escape = False
-            self.ws.send(self.escape)
+            self.ws.send_binary(self.escape)
 
-        self.ws.send(data)
+        self.ws.send_binary(data)
 
         if data == '\r':
             self.start_of_line = True
